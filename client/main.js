@@ -335,12 +335,12 @@ Template.lobby.events({
 Template.rolesMenu.helpers({
   roleKeys: function() {
     var roleKeys = [];
-    for (key in allRoles) {
-      roleKeys.push({ key : key, name : allRoles[key].name });
+    for (key in specialRoles) {
+      roleKeys.push({ key : key, name : specialRoles[key].name });
     }
     return roleKeys;
   },
-  roles: allRoles,
+  roles: specialRoles,
   errorMessage: function() {
     return Session.get('errorMessage');
   }
