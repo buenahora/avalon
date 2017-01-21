@@ -1,3 +1,22 @@
+specialRoles = {
+  percival : {
+    name: 'Percival',
+    team: 'Arthur'
+  },
+  mordred : {
+    name: 'Mordred',
+    team: 'Mordred'
+  },
+  morgana : {
+    name: 'Morgana',
+    team: 'Mordred'
+  },
+  oberon : {
+    name: 'Oberon',
+    team: 'Mordred'
+  }
+}
+
 allRoles = {
   merlin : {
     name: 'Merlin',

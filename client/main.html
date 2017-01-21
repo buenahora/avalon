@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <link rel="stylesheet"  type="text/css" href="bootstrap.min.css" />
   <script href="bootstrap.min.js" type="text/javascript"></script>
+  <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+  <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+  <script
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
+  <script src="semantic/dist/semantic.min.js"></script>
 </head>
 
 <body></body>
@@ -97,4 +108,41 @@
 
 <template name="gameView">
   <h3>Game View</h3>
+  <div id="quest-tracker">
+    <!--tracks quests-->
+    <i class="circle icon"></i>
+    <i class="circle icon"></i>
+    <i class="circle icon"></i>
+    <i class="circle icon"></i>
+    <i class="circle icon"></i>
+  </div>
+  <div id="choose-quest-card">
+    <!--display quest cards to choose from if player is on quest-->
+  </div>
+  <div id="display-quest-results">
+    <!--display result of quest-->
+    <!--must display numbeer of pass and fail cards-->
+  </div>
+  <div id="choose-quest-team">
+    <!--display all players-->
+  </div>
+  <div id="vote-quest-team">
+    <!--display players proposed on the quest-->
+    <!--display option to vote yes or no-->
+  </div>
+  <div id="roles-list">
+    <!--display list of all the roles currently in use in the game-->
+  </div>
+</template>
+
+<template name="gameEnd">
+  <div id="choose-player-to-assassinate">
+    <!--if servants pass three missions, minions can choose someone who they think is merlin to kill-->
+  </div>
+  <div id="reveal-roles">
+    <!--reveal everyones roles-->
+  </div>
+  <div id="results">
+    <!--display results of the game-->
+  </div>
 </template>
