@@ -1,4 +1,5 @@
 import '../imports/roles.js';
+import '../imports/board.js';
 
 function generateAccessCode() {
   var code = '';
@@ -332,15 +333,27 @@ Template.rolesMenu.events({
     var gameID = getCurrentGame()._id;
     var players = Players.find({'gameID': gameID});
 
-    if ($('#choose-roles-form').find(':checkbox:checked').length >= players.count() + 3) {
-      var selectedRoles = $('#choose-roles-form').find(':checkbox:checked').map(function() {
-        return allRoles[this.value];
-      }).get();
-      Games.update(gameID, {$set: {state: 'settingUp', roles: selectedRoles}});
-      Session.set('errorMessage', null);
-    } else {
-      Session.set('errorMessage', 'Please select at least ' + (players.count() + 3) + ' roles.');
+    var selectedRoles = $('#choose-roles-form').find(':checkbox:checked').map(function() {
+      return allRoles[this.value];
+    }).get();
+
+    var numPlayers = players.count();
+    if (boardInfo[numPlayers]) {
+      
     }
+
+
+
+    // if selectedRoles
+
+    // //
+    // if ($('#choose-roles-form').find(':checkbox:checked').length >= players.count() + 3) {
+      
+    //   Games.update(gameID, {$set: {state: 'settingUp', roles: selectedRoles}});
+    //   Session.set('errorMessage', null);
+    // } else {
+    //   Session.set('errorMessage', 'Please select at least ' + (players.count() + 3) + ' roles.');
+    // }
 
     return false;
   },
