@@ -16,10 +16,24 @@ function generateAccessCode() {
 function generateNewGame() {
   var game = {
     accessCode: generateAccessCode(),
+    // the roles included in the game
     roles: [],
+    // game states include 'waitingForPlayers', 'selectingRoles', 'settingUp', and 'inProgress'
     state: 'waitingForPlayers',
-    mission: 0,
-    selectedPlayerIds: []
+    // current quest number (1-5)
+    quest: 1,
+    // player ID of the quest leader
+    questLeader: null,
+    // players selected to go on a quest
+    proposal: [],
+    // number of votes to pass the proposal
+    votes: 0,
+    // number of proposals that were voted down
+    failedProposals: 0,
+    // number of fails on a quest (as opposed to successes)
+    fails: 0,
+    // number of failed quests
+    failedQuests: 0
   };
 
   var gameID = Games.insert(game);
@@ -31,7 +45,7 @@ function generateNewPlayer(game, name) {
   var player = {
     gameID: game._id,
     name: name,
-    role: null,
+    role: null
   }
 
   var playerID = Players.insert(player);
@@ -155,8 +169,13 @@ function resetGame() {
   Games.update(game._id, {$set: {
     roles: [],
     state: 'waitingForPlayers',
-    mission: 0,
-    selectedPlayerIds: []
+    quest: 1,
+    questLeader: null,
+    proposal: [],
+    votes: 0,
+    failedProposals: 0,
+    fails: 0,
+    failedQuests: 0
   }});
 }
 
@@ -316,12 +335,12 @@ Template.lobby.events({
 Template.rolesMenu.helpers({
   roleKeys: function() {
     var roleKeys = [];
-    for (key in allRoles) {
-      roleKeys.push({ key : key, name : allRoles[key].name });
+    for (key in specialRoles) {
+      roleKeys.push({ key : key, name : specialRoles[key].name });
     }
     return roleKeys;
   },
-  roles: allRoles,
+  roles: specialRoles,
   errorMessage: function() {
     return Session.get('errorMessage');
   }
