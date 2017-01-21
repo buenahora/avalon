@@ -1,67 +1,34 @@
 allRoles = {
-  // taking out doppelganger bc it complicates game too much
-  // doppelganger : {
-  //   name: 'Doppelganger',
-  //   order: 0
-  // },
-  werewolf1 : {
-    name: 'Werewolf',
-    order: 3
+  merlin : {
+    name: 'Merlin',
+    team: 'Arthur'
   },
-  werewolf2 : {
-    name: 'Werewolf',
-    order: 3
+  percival : {
+    name: 'Percival',
+    team: 'Arthur'
+  },
+  mordred : {
+    name: 'Mordred',
+    team: 'Mordred'
+  },
+  morgana : {
+    name: 'Morgana',
+    team: 'Mordred'
+  },
+  oberon : {
+    name: 'Oberon',
+    team: 'Mordred'
+  },
+  assassin : {
+    name: 'Assassin',
+    team: 'Mordred'
+  },
+  servant : {
+    name: 'Loyal Servant of Arthur',
+    team: 'Arthur'
   },
   minion : {
-    name: 'Minion',
-    order: 4
-  },
-  mason1 : {
-    name: 'Mason',
-    order: 5
-  },
-  mason2 : {
-    name: 'Mason',
-    order: 5
-  },
-  seer : {
-    name: 'Seer',
-    order: 6
-  },
-  robber : {
-    name: 'Robber',
-    order: 7
-  },
-  troublemaker : {
-    name: 'Troublemaker',
-    order: 8
-  },
-  drunk : {
-    name: 'Drunk',
-    order: 9
-  },
-  insomniac : {
-    name: 'Insomniac',
-    order: 10
-  },
-  villager1 : {
-    name: 'Villager',
-    order: 15
-  },
-  villager2 : {
-    name: 'Villager',
-    order: 15
-  },
-  villager3 : {
-    name: 'Villager',
-    order: 15
-  },
-  hunter : {
-    name: 'Hunter',
-    order: 15
-  },
-  tanner : {
-    name: 'Tanner',
-    order: 15
+    name: 'Minion of Mordred',
+    team: 'Mordred'
   }
 }

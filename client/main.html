@@ -1,6 +1,6 @@
 <head>
   <meta charset="utf-8" />
-  <title>Werewolf</title>
+  <title>Avalon</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <link rel="stylesheet"  type="text/css" href="bootstrap.min.css" />
@@ -13,17 +13,10 @@
   <div class="container-fluid">
     {{> Template.dynamic template=whichView}}
   </div>
-  <div class="container-fluid footer">
-    {{> footer}}
-  </div>
-</template>
-
-<template name="footer">
-  <h6>Built by Katie Jiang at <a href="https://github.com/katiejiang/werewolf" target="_blank">https://github.com/katiejiang/werewolf</a></h6>
 </template>
 
 <template name="startMenu">
-  <h3>One Night Ultimate Werewolf</h3>
+  <h3>Avalon: The Resistance</h3>
 
   <button type="button" id="btn-create-game-view" class="btn btn-secondary btn-lg">New Game</button>
   <button type="button" id="btn-join-game-view" class="btn btn-secondary btn-lg">Join Game</button>
@@ -102,109 +95,6 @@
   <button class="btn btn-secondary btn-md btn-leave">Leave Game</button>
 </template>
 
-<template name="nightView">
-  <h3>Night View for {{ player.name }}</h3>
-
-  <p>
-    You are the {{ player.role.name }}.
-  </p>
-
-  {{#if stillNight game turnIndex}}
-    {{#if equals activeRole.name player.role.name }}
-      <p>
-        {{instructions game players player}}
-      </p>
-      {{#if turnMessage}}
-        <p>
-          {{turnMessage}}
-        </p>
-      {{/if}}
-    {{else}}
-      It is not your turn.
-    {{/if}}
-  {{/if}}
-
-  <h5>Center Cards</h5>
-  <div class="center-cards">
-    {{#each game.centerCards}}
-      <button class="btn btn-secondary center-cards" id="card-{{@index}}">
-        Card {{@index}}
-      </button>
-    {{/each}}
-  </div>
-
-  <h5>Players</h5>
-  <div class="ingame-player-list">
-    {{#each players}}
-    <button class="btn btn-secondary player-cards" id="{{ _id }}">
-      {{ name }} <br />
-    </button>
-    {{/each}}
-  </div>
-
-  <button class="btn btn-primary btn-lg" id="btn-end-turn">End Turn</button>
-  <br />
-  <br />
-
-  <button class="btn btn-secondary btn-md btn-end">End Game</button>
-  <button class="btn btn-secondary btn-md btn-leave">Leave Game</button>
-
-</template>
-
-<template name="dayView">
-  <h3>Day View for {{ player.name }}</h3>
-
-  {{#if equals game.state 'voting'}}
-  <p>
-    Vote for one player to kill.
-  </p>
-  {{/if}}
-
-  {{#if equals game.state 'finishedVoting'}}
-    <h4>{{ winningTeam }}</h4>
-    <h4>You ended up as the {{ player.role.name }}.</h4>
-    <h5>Voting results</h5>
-    {{#if noDeaths game}}
-    <p>No one died.</p>
-    {{else}}
-      <ol>
-        {{#each game.killed}}
-          <li>
-            {{ name }} (Role: {{ role.name }})
-            <br />
-          </li>
-        {{/each}}
-      </ol>
-    {{/if}}
-  {{else}}
-    <h4><a id="countdown">{{{ timeRemaining }}}</a></h4>
-  {{/if}}
-
-
-
-  <h5>Center Cards</h5>
-  <div class="center-cards">
-    {{#each game.centerCards}}
-      <button class="btn btn-secondary">
-        Card {{@index}}
-      </button>
-    {{/each}}
-  </div>
-
-  <h5>Players</h5>
-  <div class="ingame-player-list">
-    {{#each players}}
-      <button class="btn btn-secondary vote-player" id = {{ _id }}>
-        {{ name }} <br />
-      </button>
-      {{#if equals game.state 'finishedVoting'}}
-      (Role: {{ role.name }})
-      {{/if}}
-    {{/each}}
-  </div>
-
-  <button class="btn btn-secondary btn-md btn-vote-now">Vote Now</button>
-  <button class="btn btn-secondary btn-md btn-end">End Game</button>
-  <button class="btn btn-secondary btn-md btn-leave">Leave Game</button>
-
+<template name="gameView">
+  <h3>Game View</h3>
 </template>
