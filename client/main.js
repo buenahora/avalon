@@ -25,8 +25,8 @@ function generateNewGame() {
     mode: 'PROPOSAL_MODE',
     // current quest number (1-5)
     quest: 1,
-    // player ID of the quest leader
-    questLeader: null,
+    // turn of the current quest leader
+    questLeader: 0,
     // players selected to go on a quest
     proposal: [],
     // number of votes to pass the proposal
@@ -51,7 +51,8 @@ function generateNewPlayer(game, name) {
     gameID: game._id,
     name: name,
     role: null,
-    team: null
+    team: null,
+    turn: null
   }
 
   var playerID = Players.insert(player);
@@ -91,6 +92,23 @@ function resetUserState() {
 
   Session.set('gameID', null);
   Session.set('playerID', null);
+}
+
+function updateQuestLeader() {
+  var questLeader = getCurrentGame().questLeader;
+  var gameID = getCurrentGame()._id;
+  var numPlayers = Players.find({'gameID': gameID}).count();
+  if (questLeader != numPlayers - 1) {
+    Games.update(game._id, {$set: {questLeader: questLeader + 1}});
+  } else {
+    // reset back to first player
+    Games.update(game._id, {$set: {questLeader: 0}});
+  }
+}
+
+function getQuestLeader() {
+  var questLeader = getCurrentGame().questLeader;
+  return Players.findOne({'gameID': gameID, 'turn': questLeader});
 }
 
 /* sets the state of the game (which template to render) */
@@ -382,9 +400,9 @@ Template.rolesMenu.events({
     });
 
     var numPlayers = players.count();
-    if (numMinions != boardInfo[numPlayers].numMinions - 1) {
+    if (numMinions > boardInfo[numPlayers].numMinions - 1) {
       Session.set('errorMessage', 'There must be ' + boardInfo[numPlayers].numMinions
-        + ' minions in a game with ' + numPlayers + 'players');
+        + ' minions in a game with ' + numPlayers + ' players.');
     } else {
       Games.update(gameID, {$set: {state: 'settingUp', roles: selectedRoles}});
       Session.set('errorMessage', null);
