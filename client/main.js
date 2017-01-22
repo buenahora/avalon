@@ -228,7 +228,7 @@ Template.createGame.events({
 
     return false;
   },
-  'click .btn-back-start-menu': function() {
+  'click #btn-back-start-menu': function() {
     Session.set('currentView', 'startMenu');
     return false;
   }
@@ -292,7 +292,7 @@ Template.joinGame.events({
 
     return false;
   },
-  'click .btn-back-start-menu': function() {
+  'click #btn-back-start-menu': function() {
     Session.set('urlAccessCode', null);
     Session.set('currentView', 'startMenu');
     Session.set('errorMessage', null);
@@ -321,16 +321,29 @@ Template.lobby.helpers({
     });
 
     return players;
+  },
+  errorMessage: function() {
+    return Session.get('errorMessage');
   }
 })
 
 Template.lobby.events({
-  'click .btn-leave': leaveGame,
-  'click .btn-start': function() {
-    Session.set('currentView', 'rolesMenu');
+  'click #btn-leave': leaveGame,
+  'click #btn-start': function() {
+    var gameID = getCurrentGame()._id;
+    var numPlayers = Players.find({'gameID': gameID}).count();
 
-    var game = getCurrentGame();
-    Games.update(game._id, {$set: {state: 'selectingRoles'}});
+    if (numPlayers < 5) {
+      Session.set('errorMessage', 'Game needs at least 5 players.');
+    } else if (numPlayers > 10) {
+      Session.set('errorMessage', 'Game can have at most 10 players.');
+    } else {
+      Session.set('errorMessage', null);
+      Session.set('currentView', 'rolesMenu');
+
+      var game = getCurrentGame();
+      Games.update(game._id, {$set: {state: 'selectingRoles'}});
+    }
   }
 })
 
@@ -353,20 +366,30 @@ Template.rolesMenu.events({
     var gameID = getCurrentGame()._id;
     var players = Players.find({'gameID': gameID});
 
-    if ($('#choose-roles-form').find(':checkbox:checked').length >= players.count() + 3) {
-      var selectedRoles = $('#choose-roles-form').find(':checkbox:checked').map(function() {
-        return allRoles[this.value];
-      }).get();
+    var selectedRoles = $('#choose-roles-form').find(':checkbox:checked').map(function() {
+      return specialRoles[this.value];
+    }).get();
+
+    var numMinions = 0;
+    selectedRoles.map(role => {
+      if (role.team == 'Mordred') {
+        numMinions++;
+      }
+    });
+
+    var numPlayers = players.count();
+    if (numMinions != boardInfo[numPlayers].numMinions - 1) {
+      Session.set('errorMessage', 'There must be ' + boardInfo[numPlayers].numMinions
+        + ' minions in a game with ' + numPlayers + 'players');
+    } else {
       Games.update(gameID, {$set: {state: 'settingUp', roles: selectedRoles}});
       Session.set('errorMessage', null);
-    } else {
-      Session.set('errorMessage', 'Please select at least ' + (players.count() + 3) + ' roles.');
     }
 
     return false;
   },
-  'click .btn-leave': leaveGame,
-  'click .btn-end': endGame
+  'click #btn-leave': leaveGame,
+  'click #btn-end': endGame
 })
 
 Handlebars.registerHelper('equals', function(str1, str2) {

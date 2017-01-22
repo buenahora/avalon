@@ -3,12 +3,10 @@
   <title>Avalon</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <link rel="stylesheet"  type="text/css" href="bootstrap.min.css" />
-  <script href="bootstrap.min.js" type="text/javascript"></script>
   <script
-  src="https://code.jquery.com/jquery-3.1.1.min.js"
-  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-  crossorigin="anonymous"></script>
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
   <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
   <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
   <script
@@ -29,19 +27,19 @@
 <template name="startMenu">
   <h3>Avalon: The Resistance</h3>
 
-  <button type="button" id="btn-create-game-view" class="btn btn-secondary btn-lg">New Game</button>
-  <button type="button" id="btn-join-game-view" class="btn btn-secondary btn-lg">Join Game</button>
+  <button type="button" id="btn-create-game-view" class="ui button">New Game</button>
+  <button type="button" id="btn-join-game-view" class="ui button">Join Game</button>
 </template>
 
 <template name="createGame">
   <h3>Create Game</h3>
-  <form id="create-game">
+  <form class="ui form" id="create-game">
     <div class="form-group">
       <!-- <label for="text">Name</label> -->
       <input type="text" class="form-control" id="player-name" name="playerName" placeholder='Enter your name'>
     </div>
-    <input type="submit" class="btn btn-primary btn-lg" value='Create'>
-    <button class="btn btn-secondary btn-lg btn-back-start-menu">Back</button>
+    <input type="submit" class="ui button" value='Create'>
+    <button class="ui primary button" id="btn-back-start-menu">Back</button>
   </form>
 </template>
 
@@ -52,21 +50,24 @@
     <h5>{{ errorMessage }}</h5>
   {{/if}}
 
-  <form id="join-game">
+  <form class="ui form" id="join-game">
     <div class="form-group">
       <input type="text" class="form-control" id="player-name" name="playerName" placeholder='Enter your name'>
     </div>
     <div class="form-group">
       <input type="text" class="form-control" id="access-code" name="accessCode" placeholder='Enter an access code' autocorrect="off" autocapitalize="off">
     </div>
-    <input type="submit" class="btn btn-primary btn-lg" value='Join'>
-    <button class="btn btn-secondary btn-lg btn-back-start-menu">Back</button>
+    <input type="submit" class="ui button" value='Join'>
+    <button class="ui button" id="btn-back-start-menu">Back</button>
   </form>
 </template>
 
 <template name="lobby">
   <h3>Waiting for players</h3>
   <h4>Access Code: {{game.accessCode}}</h4>
+  {{#if errorMessage}}
+  <h4>{{errorMessage}}</h4>
+  {{/if}}
   <ol id="lobby-player-list">
     {{#each players}}
     <li>
@@ -75,8 +76,8 @@
     {{/each}}
   </ol>
 
-  <button class="btn btn-primary btn-lg btn-start">Start Game</button>
-  <button class="btn btn-secondary btn-lg btn-leave">Leave Game</button>
+  <button class="ui button" id="btn-start">Start Game</button>
+  <button class="ui button" id="btn-leave">Leave Game</button>
 </template>
 
 <template name="rolesMenu">
@@ -86,7 +87,7 @@
     <h5>{{ errorMessage }}</h5>
   {{/if}}
 
-  <form id="choose-roles-form">
+  <form class="ui form" id="choose-roles-form">
     <div id="choose-roles-list">
       {{#each roleKeys}}
         <div class="checkbox">
@@ -98,17 +99,18 @@
         </div>
       {{/each}}
     </div>
-    <input type="submit" class="btn btn-primary btn-lg" value='Start' />
+    <input type="submit" class="ui button" value='Start' />
   </form>
 
   <br />
-  <button class="btn btn-secondary btn-md btn-end">End Game</button>
-  <button class="btn btn-secondary btn-md btn-leave">Leave Game</button>
+  <button class="ui button" id="btn-end">End Game</button>
+  <button class="ui button" id="btn-leave">Leave Game</button>
 </template>
 
 <template name="gameView">
-  <h3>Game View</h3>
+  <h3 class="ui header">Game View</h3>
   <div id="quest-tracker">
+    <h4 class="ui header">Quests</h4>
     <!--tracks quests-->
     <i class="circle icon"></i>
     <i class="circle icon"></i>

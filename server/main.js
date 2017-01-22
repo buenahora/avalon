@@ -60,7 +60,7 @@ function shuffleArray(array) {
 function assignRoles(gameID, players, roles) {
 
   var game = Games.findOne(gameID);
-  var board = boardSize[players.count()];
+  var board = boardInfo[players.count()];
   var numMinions = board.numMinions;
   var numServants = players.count() - numMinions;
   for (var i in roles) {
