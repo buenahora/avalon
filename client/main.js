@@ -1,4 +1,5 @@
 import '../imports/roles.js';
+import '../imports/board.js';
 
 function generateAccessCode() {
   var code = '';
@@ -351,14 +352,24 @@ Template.rolesMenu.events({
     var gameID = getCurrentGame()._id;
     var players = Players.find({'gameID': gameID});
 
-    if ($('#choose-roles-form').find(':checkbox:checked').length >= players.count() + 3) {
-      var selectedRoles = $('#choose-roles-form').find(':checkbox:checked').map(function() {
-        return allRoles[this.value];
-      }).get();
+    var selectedRoles = $('#choose-roles-form').find(':checkbox:checked').map(function() {
+      return specialRoles[this.value];
+    }).get();
+
+    var numMinions = 0;
+    selectedRoles.map(role => {
+      if (role.team == 'Mordred') {
+        numMinions++;
+      }
+    });
+
+    var numPlayers = players.count();
+    if (numMinions != boardInfo[numPlayers].numMinions - 1) {
+      Session.set('errorMessage', 'There must be ' + boardInfo[numPlayers].numMinions 
+        + ' minions in a game with ' + numPlayers + 'players');
+    } else {
       Games.update(gameID, {$set: {state: 'settingUp', roles: selectedRoles}});
       Session.set('errorMessage', null);
-    } else {
-      Session.set('errorMessage', 'Please select at least ' + (players.count() + 3) + ' roles.');
     }
 
     return false;
