@@ -4,15 +4,15 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <script
-    src="https://code.jquery.com/jquery-3.1.1.min.js"
-    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-    crossorigin="anonymous"></script>
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
   <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
   <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
   <script
-    src="https://code.jquery.com/jquery-3.1.1.min.js"
-    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-    crossorigin="anonymous"></script>
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
   <script src="semantic/dist/semantic.min.js"></script>
 </head>
 
@@ -20,7 +20,8 @@
 
 <template name="main">
   <div class="container-fluid">
-    {{> Template.dynamic template=whichView}}
+    {{> gameView }}
+    <!--{{> Template.dynamic template=whichView}}-->
   </div>
 </template>
 
@@ -47,7 +48,7 @@
   <h3>Join Game</h3>
 
   {{#if errorMessage}}
-    <h5>{{ errorMessage }}</h5>
+  <h5>{{ errorMessage }}</h5>
   {{/if}}
 
   <form class="ui form" id="join-game">
@@ -84,19 +85,19 @@
   <h3>Choose which roles</h3>
 
   {{#if errorMessage}}
-    <h5>{{ errorMessage }}</h5>
+  <h5>{{ errorMessage }}</h5>
   {{/if}}
 
   <form class="ui form" id="choose-roles-form">
     <div id="choose-roles-list">
       {{#each roleKeys}}
-        <div class="checkbox">
-          <label class="role-checkbox">
-            <input type="checkbox" name="{{ key }}" value="{{ key }}" class="toggle-role"
-            onclick="$(this).parent().parent().toggleClass('selected-role')"/>
-            {{ name }}<br>
-          </label>
-        </div>
+      <div class="checkbox">
+        <label class="role-checkbox">
+          <input type="checkbox" name="{{ key }}" value="{{ key }}" class="toggle-role"
+          onclick="$(this).parent().parent().toggleClass('selected-role')"/>
+          {{ name }}<br>
+        </label>
+      </div>
       {{/each}}
     </div>
     <input type="submit" class="ui button" value='Start' />
@@ -109,6 +110,7 @@
 
 <template name="gameView">
   <h3 class="ui header">Game View</h3>
+  <div class="ui divider"></div>
   <div id="quest-tracker">
     <h4 class="ui header">Quests</h4>
     <!--tracks quests-->
@@ -118,41 +120,63 @@
     <i class="circle icon"></i>
     <i class="circle icon"></i>
   </div>
+  <div class="ui divider"></div>
   <div id="choose-quest-card">
     <h4 class="ui header">Select Quest Card</h4>
+    <div class="ui two stackable cards">
+      <div class="green card">
+        <div class="content">
+          <div class="header">Success</div>
+        </div>
+        <div class="ui bottom attached button">
+          Select Card
+        </div>
+      </div>
+      <div class="red card">
+        <div class="content">
+          <div class="header">Fail</div>
+        </div>
+        <div class="ui bottom attached button">
+          Select Card
+        </div>
+      </div>
+    </div>
     <!--display quest cards to choose from if player is on quest-->
   </div>
+  <div class="ui divider"></div>
   <div id="display-quest-results">
+    <h4 class="header">Quest Results</h4>
     <!--display result of quest-->
     <!--must display numbeer of pass and fail cards-->
   </div>
+  <div class="ui divider"></div>
   <div id="choose-quest-team">
     <h4 class="ui header">Players</h4>
-    <div class="ui horizontal list">
+    <div class="ui horizontal selection list">
       <!--display all players-->
-      <div class="player-list">
-        <div class="item">
+      <div class="item">
+        <div class="list-player">
           <div class="content">
             <a class="header">Player 1</a>
           </div>
         </div>
       </div>
-      <div class="player-list">
-        <div class="item">
+      <div class="item">
+        <div class="list-player">
           <div class="content">
             <a class="header">Player 2</a>
           </div>
         </div>
       </div>
-      <div class="player-list">
-        <div class="item">
+      <div class="item">
+        <div class="list-player">
           <div class="content">
             <a class="header">Player 3</a>
           </div>
         </div>
       </div>
-      <div class="player-list">
-        <div class="item">
+      <div class="item">
+        <div class="list-player">
           <div class="content">
             <a class="header">Player 4</a>
           </div>
@@ -160,12 +184,25 @@
       </div>
     </div>
   </div>
+  <div class="ui divider"></div>
   <div id="vote-quest-team">
+    <h4 class="ui header">Proposed Team</h4>
     <!--display players proposed on the quest-->
     <!--display option to vote yes or no-->
+    <button class="positive ui button">Approve</button>
+    <button class="negative ui button">Reject</button>
   </div>
+  <div class="ui divider"></div>
   <div id="roles-list">
+    <h4 class="ui header">Current Roles in Play</h4>
+    <div class="ui horizontal list">
+      <div class="item">
+        <div class="content">
+          <a class="header">Merlin</a>
+        </div>
+      </div>
     <!--display list of all the roles currently in use in the game-->
+    </div>
   </div>
 </template>
 
