@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import '../imports/roles.js';
+import '../imports/board.js';
 
 Meteor.startup(() => {
   Games.remove({});
@@ -35,7 +36,7 @@ Games.find({'state': 'settingUp'}).observeChanges({
   added: function(id, game) {
     var players = Players.find({gameID: id});
     assignRoles(id, players, game.roles);
-    Games.update(id, {$set: {state: 'nightTime'}});
+    Games.update(id, {$set: {state: 'inProgress'}});
   }
 })
 
@@ -57,7 +58,30 @@ function shuffleArray(array) {
 }
 
 function assignRoles(gameID, players, roles) {
+
+  var game = Games.findOne(gameID);
+  var board = boardInfo[players.count()];
+  var numMinions = board.numMinions;
+  var numServants = players.count() - numMinions;
+  for (var i in roles) {
+    if (roles[i].team === 'Arthur') {
+      numServants--;
+    } else if (roles[i].team === 'Mordred') {
+      numMinions--;
+    }
+  }
+  roles.push(allRoles.merlin);
+  roles.push(allRoles.assassin);
+
+  for (var i = 0; i < numServants - 1; i++) {
+    roles.push(allRoles.servant);
+  }
+  for (var i = 0; i < numMinions - 1; i++) {
+    roles.push(allRoles.minion);
+  }
+
   var shuffledRoles = shuffleArray(roles);
+
   var playerRoles = [];
   players.forEach(function(player) {
     role = shuffledRoles.pop();
@@ -70,79 +94,3 @@ function assignRoles(gameID, players, roles) {
   Games.update(gameID, {$set: {playerRoles: playerRoles}});
   Games.update(gameID, {$set: {centerCards: shuffledRoles}});
 }
-
-Games.find({'swapping': true}).observeChanges({
-  added: function(id, game) {
-    for (index in game.swaps) {
-      var swap = game.swaps[index];
-      Players.update(swap.id, {$set: {role : swap.role}});
-    }
-
-    var gameEndTime = moment().add(game.discussionTime, 'minutes').valueOf();
-    Games.update(id, {$set: {
-      swaps: [],
-      swapping: false,
-      endTime: gameEndTime,
-      paused: false,
-      pausedTime: null
-    }});
-  }
-})
-
-Games.find({'state': 'voting'}).observeChanges({
-  added: function(id, game) {
-    var votingEndTime = moment().add(10, 'seconds').valueOf();
-    Games.update(id, {$set: {
-      endTime: votingEndTime,
-      paused: false,
-      pausedTime: null
-    }});
-  }
-})
-
-Games.find({'state': 'finishedVoting'}).observeChanges({
-  added: function(id, game) {
-    var players = Players.find({gameID: id});
-    var votes = [];
-    players.forEach(function(player) {
-      if (player.vote) {
-        votes.push(player.vote);
-      }
-    });
-
-    if (votes.length > 0) {
-
-      var voteFrequency = {};
-      for (index in votes) {
-        var vote = votes[index].toString();
-        if (voteFrequency[vote]) {
-          voteFrequency[vote] += 1;
-        } else {
-          voteFrequency[vote] = 1;
-        }
-      }
-      var sortedVotes = [];
-      for (key in voteFrequency) {
-        sortedVotes.push({playerID : key, numVotes: voteFrequency[key]});
-      }
-      sortedVotes.sort(function(vote1, vote2) {
-        return vote1.numVotes - vote2.numVotes;
-      }).reverse();
-
-      var killed = [];
-      killed.push(Players.findOne(sortedVotes[0].playerID));
-      for (var i = 1; i < sortedVotes.length; i++) {
-        if (sortedVotes[i].numVotes == sortedVotes[0].numVotes) {
-          killed.push(Players.findOne(sortedVotes[i].playerID));
-        } else {
-          break;
-        }
-      }
-      if (killed.length == game.playerRoles.length) {
-        killed = [];
-      }
-
-      Games.update(id, {$set: {'killed': killed}});
-    }
-  }
-})

@@ -1,4 +1,5 @@
 import '../imports/roles.js';
+import '../imports/board.js';
 
 function generateAccessCode() {
   var code = '';
@@ -16,27 +17,24 @@ function generateAccessCode() {
 function generateNewGame() {
   var game = {
     accessCode: generateAccessCode(),
-    centerCards: [],
-    playerRoles: [],
+    // the roles included in the game
+    roles: [],
+    // game states include 'waitingForPlayers', 'selectingRoles', 'settingUp', and 'inProgress'
     state: 'waitingForPlayers',
-    turnIndex: 0,
-    numMoves: 0,
-    moveLimit: 0,
-    selectedPlayerIds: [],
-    selectedCenterCards: [],
-    // whether or not werewolf can click center or player cards
-    werewolfCenter: false,
-    // list of swaps in the form of { player_id : ___, new_role : ___ }
-    swaps: [],
-    swapping: false,
-    insomniacRole: allRoles.insomniac,
-    // time
-    discussionTime: 5,
-    endTime: null,
-    paused: false,
-    pausedTime: null,
-    // playerIDs, sorted afterwards
-    killed: []
+    // current quest number (1-5)
+    quest: 1,
+    // player ID of the quest leader
+    questLeader: null,
+    // players selected to go on a quest
+    proposal: [],
+    // number of votes to pass the proposal
+    votes: 0,
+    // number of proposals that were voted down
+    failedProposals: 0,
+    // number of fails on a quest (as opposed to successes)
+    fails: 0,
+    // number of failed quests
+    failedQuests: 0
   };
 
   var gameID = Games.insert(game);
@@ -49,7 +47,7 @@ function generateNewPlayer(game, name) {
     gameID: game._id,
     name: name,
     role: null,
-    vote: null // id that this player votes to kill
+    team: null
   }
 
   var playerID = Players.insert(player);
@@ -94,9 +92,8 @@ function resetUserState() {
 /* sets the state of the game (which template to render) */
 /* types of game state:
     waitingForPlayers (lobby)
-    selectingRoles (roles)
-    settingUp (loading)
-    playing
+    selectingRoles (rolesMenu)
+    inProgress (gameView)
  */
 function trackGameState() {
   var gameID = Session.get('gameID');
@@ -120,10 +117,8 @@ function trackGameState() {
     Session.set('currentView', 'lobby');
   } else if (game.state === 'selectingRoles') {
     Session.set('currentView', 'rolesMenu');
-  } else if (game.state === 'nightTime') {
-    Session.set('currentView', 'nightView');
-  } else if (game.state === 'dayTime') {
-    Session.set('currentView', 'dayView');
+  } else if (game.state === 'inProgress') {
+    Session.set('currentView', 'gameView');
   }
   // game.state can also be finishedVoting and voting
 }
@@ -174,23 +169,15 @@ function leaveGame() {
 function resetGame() {
   var game = getCurrentGame();
   Games.update(game._id, {$set: {
-    centerCards: [],
-    playerRoles: [],
+    roles: [],
     state: 'waitingForPlayers',
-    turnIndex: 0,
-    numMoves: 0,
-    moveLimit: 0,
-    selectedPlayerIds: [],
-    selectedCenterCards: [],
-    werewolfCenter: false,
-    swaps: [],
-    swapping: false,
-    insomniacRole: allRoles.insomniac,
-    endTime: null,
-    paused: false,
-    pausedTime: null,
-    // playerIDs, sorted afterwards
-    killed: []
+    quest: 1,
+    questLeader: null,
+    proposal: [],
+    votes: 0,
+    failedProposals: 0,
+    fails: 0,
+    failedQuests: 0
   }});
 }
 
@@ -241,7 +228,7 @@ Template.createGame.events({
 
     return false;
   },
-  'click .btn-back-start-menu': function() {
+  'click #btn-back-start-menu': function() {
     Session.set('currentView', 'startMenu');
     return false;
   }
@@ -305,7 +292,7 @@ Template.joinGame.events({
 
     return false;
   },
-  'click .btn-back-start-menu': function() {
+  'click #btn-back-start-menu': function() {
     Session.set('urlAccessCode', null);
     Session.set('currentView', 'startMenu');
     Session.set('errorMessage', null);
@@ -334,28 +321,41 @@ Template.lobby.helpers({
     });
 
     return players;
+  },
+  errorMessage: function() {
+    return Session.get('errorMessage');
   }
 })
 
 Template.lobby.events({
-  'click .btn-leave': leaveGame,
-  'click .btn-start': function() {
-    Session.set('currentView', 'rolesMenu');
+  'click #btn-leave': leaveGame,
+  'click #btn-start': function() {
+    var gameID = getCurrentGame()._id;
+    var numPlayers = Players.find({'gameID': gameID}).count();
 
-    var game = getCurrentGame();
-    Games.update(game._id, {$set: {state: 'selectingRoles'}});
+    if (numPlayers < 5) {
+      Session.set('errorMessage', 'Game needs at least 5 players.');
+    } else if (numPlayers > 10) {
+      Session.set('errorMessage', 'Game can have at most 10 players.');
+    } else {
+      Session.set('errorMessage', null);
+      Session.set('currentView', 'rolesMenu');
+
+      var game = getCurrentGame();
+      Games.update(game._id, {$set: {state: 'selectingRoles'}});
+    }
   }
 })
 
 Template.rolesMenu.helpers({
   roleKeys: function() {
     var roleKeys = [];
-    for (key in allRoles) {
-      roleKeys.push({ key : key, name : allRoles[key].name });
+    for (key in specialRoles) {
+      roleKeys.push({ key : key, name : specialRoles[key].name });
     }
     return roleKeys;
   },
-  roles: allRoles,
+  roles: specialRoles,
   errorMessage: function() {
     return Session.get('errorMessage');
   }
@@ -366,404 +366,32 @@ Template.rolesMenu.events({
     var gameID = getCurrentGame()._id;
     var players = Players.find({'gameID': gameID});
 
-    if ($('#choose-roles-form').find(':checkbox:checked').length >= players.count() + 3) {
-      var selectedRoles = $('#choose-roles-form').find(':checkbox:checked').map(function() {
-        return allRoles[this.value];
-      }).get();
+    var selectedRoles = $('#choose-roles-form').find(':checkbox:checked').map(function() {
+      return specialRoles[this.value];
+    }).get();
+
+    var numMinions = 0;
+    selectedRoles.map(role => {
+      if (role.team == 'Mordred') {
+        numMinions++;
+      }
+    });
+
+    var numPlayers = players.count();
+    if (numMinions != boardInfo[numPlayers].numMinions - 1) {
+      Session.set('errorMessage', 'There must be ' + boardInfo[numPlayers].numMinions
+        + ' minions in a game with ' + numPlayers + 'players');
+    } else {
       Games.update(gameID, {$set: {state: 'settingUp', roles: selectedRoles}});
       Session.set('errorMessage', null);
-    } else {
-      Session.set('errorMessage', 'Please select at least ' + (players.count() + 3) + ' roles.');
     }
 
     return false;
   },
-  'click .btn-leave': leaveGame,
-  'click .btn-end': endGame
+  'click #btn-leave': leaveGame,
+  'click #btn-end': endGame
 })
 
 Handlebars.registerHelper('equals', function(str1, str2) {
   return str1 === str2;
 })
-
-// also updates moveLimit
-Handlebars.registerHelper('instructions', function(game, players, player) {
-  var roleName = player.role.name;
-
-  if (roleName === 'Doppelganger') {
-    Games.update(game._id, {$set: {moveLimit: 1}});
-    return 'doppelganger instructions';
-  }
-  else if (roleName === 'Werewolf') {
-    var playerArray = players.map(function(doc) {return doc});
-    var werewolves = playerArray.filter(function(p) {
-      return p.role.name === 'Werewolf'}
-    ).map(function(p) {
-      return p.name;
-    });
-    if (werewolves.length == 1) {
-      Games.update(game._id, {$set: {moveLimit: 1}});
-      Games.update(game._id, {$set: {werewolfCenter: true}});
-      return "Werewolf, wake up. Since you are a lone wolf, you may look at one of the center cards.";
-    } else {
-      Games.update(game._id, {$set: {moveLimit: 0}});
-      return "Werewolves, wake up. There are " + werewolves.length + " of you: " + werewolves.join(', ') + ".";
-    }
-  }
-  else if (roleName === 'Minion') {
-    var playerArray = players.map(function(doc) {return doc});
-    var werewolves = playerArray.filter(function(p) {
-      return p.role.name === 'Werewolf'}
-    ).map(function(p) {
-      return p.name;
-    });
-    Games.update(game._id, {$set: {moveLimit: 0}});
-    if (werewolves.length == 0) {
-      return "Minion, wake up. There are no werewolves.";
-    } else {
-      return "Minion, wake up. There are " + werewolves.length + " werewolves that you must protect: " + werewolves.join(', ') + ".";
-    }
-  }
-  else if (roleName === 'Mason') {
-    var playerArray = players.map(function(doc) {return doc});
-    var masons = playerArray.filter(function(p) {
-      return p.role.name === 'Mason'}
-    ).map(function(p) {
-      return p.name;
-    });
-    Games.update(game._id, {$set: {moveLimit: 0}});
-    if (masons.length == 1) {
-      return "Mason, wake up. You are the only mason.";
-    } else {
-      return "Masons, wake up. There are " + masons.length + " of you: " + masons.join(', ') + ".";
-    }
-  }
-  else if (roleName === 'Seer') {
-    Games.update(game._id, {$set: {moveLimit: 2}});
-    return "Seer, wake up. You may look at another player's card or two of the center cards."
-  }
-  else if (roleName === 'Robber') {
-    Games.update(game._id, {$set: {moveLimit: 1}});
-    return "Robber, wake up. You may exchange your card with another player's card, and then view your new card."
-  }
-  else if (roleName === 'Troublemaker') {
-    Games.update(game._id, {$set: {moveLimit: 2}});
-    return "Troublemaker, wake up. You may exchange cards between two players."
-  }
-  else if (roleName === 'Drunk') {
-    Games.update(game._id, {$set: {moveLimit: 1}});
-    return "Drunk, wake up and exchange your card with a card from the center."
-  }
-  else if (roleName === 'Insomniac') {
-    Games.update(game._id, {$set: {moveLimit: 0}});
-    return "Insomniac, wake up and look at your card. Your role is " + game.insomniacRole.name + ".";
-  }
-})
-
-Handlebars.registerHelper('stillNight', function(game) {
-  var role = game.playerRoles[game.turnIndex];
-  return role && role.order < 15;
-});
-
-Template.nightView.helpers({
-  game: getCurrentGame,
-  player: getCurrentPlayer,
-  players: function () {
-    var game = getCurrentGame();
-    if (!game) {
-      return null;
-    }
-
-    return Players.find({'gameID': game._id}, {'sort': {'createdAt': 1}}).fetch();
-  },
-  turnIndex: function () {
-    return getCurrentGame().turnIndex;
-  },
-  activeRole: function () {
-    var game = getCurrentGame();
-    return game.playerRoles[game.turnIndex];
-  },
-  turnMessage: function () {
-    return Session.get('turnMessage');
-  }
-})
-
-function isTurn(game, player) {
-  if (!game.playerRoles[game.turnIndex]) {
-    return false;
-  }
-  var activeRole = game.playerRoles[game.turnIndex].name;
-  var playerRole = player.role.name;
-  return activeRole === playerRole;
-}
-
-function canClickCenter(game, player, clickedCardID) {
-  var roleName = player.role.name;
-  if (roleName === 'Werewolf' && !game.werewolfCenter) {
-    return false;
-  }
-  else if (roleName !== 'Werewolf' && roleName !== 'Seer' && roleName !== 'Drunk') {
-    return false;
-  }
-
-  return game.selectedCenterCards.indexOf(clickedCardID) < 0;
-}
-
-function canClickPlayer(game, activePlayer, clickedPlayer) {
-  if (activePlayer.name === clickedPlayer.name) {
-    return false;
-  }
-
-  var roleName = activePlayer.role.name;
-  if (roleName === 'Seer' && game.numMoves != 0) {
-    return false;
-  }
-  if (roleName !== 'Doppelganger' && roleName !== 'Seer' && roleName !== 'Troublemaker' && roleName !== 'Robber') {
-    return false;
-  }
-
-  return game.selectedPlayerIds.indexOf(clickedPlayer._id) < 0;
-}
-
-function canEndNight () {
-  var game = getCurrentGame();
-  var role = game.playerRoles[game.turnIndex];
-  return !(role && role.order < 15);
-}
-
-Template.nightView.events({
-  'click #btn-end-turn': function() {
-    var game = getCurrentGame();
-    var player = getCurrentPlayer();
-    if (isTurn(game, player) && game.moveLimit == game.numMoves) {
-      var roleName = player.role.name;
-      var swaps = game.swaps;
-
-      // perform necessary role swaps
-      if (roleName === 'Robber') {
-        var clickedPlayer = Players.findOne(game.selectedPlayerIds[0]);
-        swaps.push({ id : player._id, role : clickedPlayer.role });
-        swaps.push({ id : clickedPlayer._id, role : allRoles.robber });
-        if (clickedPlayer.role.name === 'Insomniac') {
-          Games.update(game._id, {$set: {insomniacRole: allRoles.robber}});
-        }
-        Games.update(game._id, {$set: {swaps: swaps}});
-      }
-      else if (roleName === 'Troublemaker') {
-        var player0 = Players.findOne(game.selectedPlayerIds[0]);
-        var player1 = Players.findOne(game.selectedPlayerIds[1]);
-        swaps.push({ id : player0._id, role : player1.role });
-        swaps.push({ id : player1._id, role : player0.role });
-        if (player0.role.name === 'Insomniac') {
-          Games.update(game._id, {$set: {insomniacRole: player1.role}});
-        }
-        if (player1.role.name === 'Insomniac') {
-          Games.update(game._id, {$set: {insomniacRole: player0.role}});
-        }
-        Games.update(game._id, {$set: {swaps: swaps}});
-      }
-      else if (roleName === 'Drunk') {
-        var clickedCardID = game.selectedCenterCards[0];
-        var clickedRole = game.centerCards[clickedCardID];
-        swaps.push({ id : player._id, role : clickedRole });
-        var newCenterCards = game.centerCards;
-        newCenterCards[clickedCardID] = allRoles.drunk;
-        Games.update(game._id, {$set: {centerCards: newCenterCards}});
-        Games.update(game._id, {$set: {swaps: swaps}});
-      }
-
-      var game = getCurrentGame();
-      // css
-      for (index in game.selectedCenterCards) {
-        var cssId = '#card-' + game.selectedCenterCards[index];
-        $(cssId).removeClass('selected-card');
-      }
-      for (index in game.selectedPlayerIds) {
-        var cssId = '#' + game.selectedPlayerIds[index];
-        $(cssId).removeClass('selected-card');
-      }
-
-
-      Games.update(game._id, {$set: {turnIndex: game.turnIndex + 1}});
-      Games.update(game._id, {$set: {numMoves: 0}});
-      Games.update(game._id, {$set: {selectedPlayerIds: []}});
-      Games.update(game._id, {$set: {selectedCenterCards: []}});
-
-      Session.set('turnMessage', null);
-
-      if (canEndNight()) {
-        var game = getCurrentGame();
-        Games.update(game._id, {$set: {swapping: true}});
-        Games.update(game._id, {$set: {state: 'dayTime'}});
-      }
-    }
-
-    return false;
-  },
-  'click .center-cards': function(event) {
-    var game = getCurrentGame();
-    var player = getCurrentPlayer();
-    if (game.numMoves < game.moveLimit && isTurn(game, player)) {
-      var clickedCardID = event.currentTarget.id.replace('card-', '');
-      if (canClickCenter(game, player, clickedCardID)) {
-        var cssId = '#' + event.currentTarget.id;
-        $(cssId).addClass('selected-card');
-        var roleName = player.role.name;
-        if (roleName === 'Werewolf') {
-          Session.set('turnMessage', "Card " + clickedCardID + " is the " + game.centerCards[clickedCardID].name + ".");
-        }
-        else if (roleName === 'Seer') {
-          var message = Session.get('turnMessage');
-          if (message) {
-            message += " Card " + clickedCardID + " is the " + game.centerCards[clickedCardID].name + ".";
-          } else {
-            message = "Card " + clickedCardID + " is the " + game.centerCards[clickedCardID].name + ".";
-          }
-          Session.set('turnMessage', message);
-        }
-        Games.update(game._id, {$set: {numMoves: game.numMoves + 1}});
-        Games.update(game._id, {$push: {selectedCenterCards: clickedCardID}});
-      }
-    }
-    return false;
-  },
-  'click .player-cards': function(event) {
-    var game = getCurrentGame();
-    var player = getCurrentPlayer();
-    if (game.numMoves < game.moveLimit && isTurn(game, player)) {
-      var clickedPlayer = Players.findOne(event.currentTarget.id);
-      if (canClickPlayer(game, player, clickedPlayer)) {
-        var cssId = '#' + event.currentTarget.id;
-        $(cssId).addClass('selected-card');
-        var roleName = player.role.name;
-        if (roleName === 'Doppelganger') {
-          Session.set('turnMessage', "Your new role is " + clickedPlayer.role.name + ".");
-        }
-        else if (roleName === 'Seer') {
-          Session.set('turnMessage', clickedPlayer.name + "'s role is " + clickedPlayer.role.name + ".");
-          Games.update(game._id, {$set: {numMoves: game.numMoves + 1}});
-        }
-        else if (roleName === 'Robber') {
-          Session.set('turnMessage', "You stole " + clickedPlayer.name + "'s card. Your new role is " + clickedPlayer.role.name + ".");
-        }
-        var game = getCurrentGame();
-        Games.update(game._id, {$set: {numMoves: game.numMoves + 1}});
-        Games.update(game._id, {$push: {selectedPlayerIds: clickedPlayer._id}});
-      }
-    }
-    return false;
-  },
-  'click .btn-leave': leaveGame,
-  'click .btn-end': endGame
-});
-
-function getTimeRemaining() {
-  var game = getCurrentGame();
-  var localEndTime = game.endTime - TimeSync.serverOffset();
-
-  if (game.paused) {
-    var localPausedTime = game.pausedTime - TimeSync.serverOffset();
-    var timeRemaining = localEndTime - localPausedTime;
-  } else {
-    var timeRemaining = localEndTime - Session.get('time');
-  }
-
-  if (timeRemaining < 0 && timeRemaining > -5000) {
-    if (game.state !== 'voting') {
-      Games.update(game._id, {$set: {'state': 'voting'}});
-    }
-  }
-
-  if (timeRemaining < 0) {
-    timeRemaining = 0;
-  }
-
-  return timeRemaining;
-}
-
-function getVotingTimeRemaining() {
-  var game = getCurrentGame();
-
-  var localEndTime = game.endTime - TimeSync.serverOffset();
-  var timeRemaining = localEndTime - Session.get('time');
-
-  if (timeRemaining < 1000 && timeRemaining > 0) {
-    var player = getCurrentPlayer();
-    Games.update(game._id, {$set: {'state': 'finishedVoting'}});
-  }
-
-  if (timeRemaining < 0) {
-    timeRemaining = 0;
-  }
-
-  return timeRemaining;
-}
-
-Template.dayView.helpers({
-  game: getCurrentGame,
-  player: getCurrentPlayer,
-  players: function () {
-    var game = getCurrentGame();
-    if (!game) {
-      return null;
-    }
-
-    return Players.find({'gameID': game._id}, {'sort': {'createdAt': 1}}).fetch();
-  },
-  timeRemaining: function () {
-    var game = getCurrentGame();
-    if (game.state === 'voting' || game.state === 'finishedVoting') {
-      var timeRemaining = getVotingTimeRemaining();
-    } else {
-      var timeRemaining = getTimeRemaining();
-    }
-
-    return moment(timeRemaining).format('m[<span>:</span>]ss');
-  },
-  winningTeam: function() {
-    var game = getCurrentGame();
-    for (index in game.killed) {
-      var roleName = game.killed[index].role.name;
-      if (roleName === 'Tanner') {
-        return 'The Tanner wins!';
-      }
-      if (roleName === 'Werewolf') {
-        return 'The Villagers win!'
-      }
-    }
-    return 'The Werewolves win!';
-  }
-})
-
-Handlebars.registerHelper('noDeaths', function(game) {
-  return game.killed.length == 0;
-})
-
-Template.dayView.events({
-  'click #countdown': function () {
-    var game = getCurrentGame();
-    var currentServerTime = TimeSync.serverTime(moment());
-
-    if(game.paused) {
-      var newEndTime = game.endTime - game.pausedTime + currentServerTime;
-      Games.update(game._id, {$set: {paused: false, pausedTime: null, endTime: newEndTime}});
-    } else {
-      Games.update(game._id, {$set: {paused: true, pausedTime: currentServerTime}});
-    }
-  },
-  'click .vote-player': function(event) {
-    var game = getCurrentGame();
-    var player = getCurrentPlayer();
-
-    Players.update(player._id, {$set: {vote: event.currentTarget.id}});
-    return false;
-  },
-  'click .btn-leave': leaveGame,
-  'click .btn-end': endGame,
-  'click .btn-vote-now': function () {
-    var game = getCurrentGame();
-    if (game.state !== 'voting') {
-      Games.update(game._id, {$set: {'state': 'voting'}});
-    }
-  }
-});

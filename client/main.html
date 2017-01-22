@@ -1,10 +1,19 @@
 <head>
   <meta charset="utf-8" />
-  <title>Werewolf</title>
+  <title>Avalon</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <link rel="stylesheet"  type="text/css" href="bootstrap.min.css" />
-  <script href="bootstrap.min.js" type="text/javascript"></script>
+  <script
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+  <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+  <script
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
+  <script src="semantic/dist/semantic.min.js"></script>
 </head>
 
 <body></body>
@@ -13,31 +22,24 @@
   <div class="container-fluid">
     {{> Template.dynamic template=whichView}}
   </div>
-  <div class="container-fluid footer">
-    {{> footer}}
-  </div>
-</template>
-
-<template name="footer">
-  <h6>Built by Katie Jiang at <a href="https://github.com/katiejiang/werewolf" target="_blank">https://github.com/katiejiang/werewolf</a></h6>
 </template>
 
 <template name="startMenu">
-  <h3>One Night Ultimate Werewolf</h3>
+  <h3>Avalon: The Resistance</h3>
 
-  <button type="button" id="btn-create-game-view" class="btn btn-secondary btn-lg">New Game</button>
-  <button type="button" id="btn-join-game-view" class="btn btn-secondary btn-lg">Join Game</button>
+  <button type="button" id="btn-create-game-view" class="ui button">New Game</button>
+  <button type="button" id="btn-join-game-view" class="ui button">Join Game</button>
 </template>
 
 <template name="createGame">
   <h3>Create Game</h3>
-  <form id="create-game">
+  <form class="ui form" id="create-game">
     <div class="form-group">
       <!-- <label for="text">Name</label> -->
       <input type="text" class="form-control" id="player-name" name="playerName" placeholder='Enter your name'>
     </div>
-    <input type="submit" class="btn btn-primary btn-lg" value='Create'>
-    <button class="btn btn-secondary btn-lg btn-back-start-menu">Back</button>
+    <input type="submit" class="ui button" value='Create'>
+    <button class="ui primary button" id="btn-back-start-menu">Back</button>
   </form>
 </template>
 
@@ -48,21 +50,24 @@
     <h5>{{ errorMessage }}</h5>
   {{/if}}
 
-  <form id="join-game">
+  <form class="ui form" id="join-game">
     <div class="form-group">
       <input type="text" class="form-control" id="player-name" name="playerName" placeholder='Enter your name'>
     </div>
     <div class="form-group">
       <input type="text" class="form-control" id="access-code" name="accessCode" placeholder='Enter an access code' autocorrect="off" autocapitalize="off">
     </div>
-    <input type="submit" class="btn btn-primary btn-lg" value='Join'>
-    <button class="btn btn-secondary btn-lg btn-back-start-menu">Back</button>
+    <input type="submit" class="ui button" value='Join'>
+    <button class="ui button" id="btn-back-start-menu">Back</button>
   </form>
 </template>
 
 <template name="lobby">
   <h3>Waiting for players</h3>
   <h4>Access Code: {{game.accessCode}}</h4>
+  {{#if errorMessage}}
+  <h4>{{errorMessage}}</h4>
+  {{/if}}
   <ol id="lobby-player-list">
     {{#each players}}
     <li>
@@ -71,8 +76,8 @@
     {{/each}}
   </ol>
 
-  <button class="btn btn-primary btn-lg btn-start">Start Game</button>
-  <button class="btn btn-secondary btn-lg btn-leave">Leave Game</button>
+  <button class="ui button" id="btn-start">Start Game</button>
+  <button class="ui button" id="btn-leave">Leave Game</button>
 </template>
 
 <template name="rolesMenu">
@@ -82,7 +87,7 @@
     <h5>{{ errorMessage }}</h5>
   {{/if}}
 
-  <form id="choose-roles-form">
+  <form class="ui form" id="choose-roles-form">
     <div id="choose-roles-list">
       {{#each roleKeys}}
         <div class="checkbox">
@@ -94,117 +99,52 @@
         </div>
       {{/each}}
     </div>
-    <input type="submit" class="btn btn-primary btn-lg" value='Start' />
+    <input type="submit" class="ui button" value='Start' />
   </form>
 
   <br />
-  <button class="btn btn-secondary btn-md btn-end">End Game</button>
-  <button class="btn btn-secondary btn-md btn-leave">Leave Game</button>
+  <button class="ui button" id="btn-end">End Game</button>
+  <button class="ui button" id="btn-leave">Leave Game</button>
 </template>
 
-<template name="nightView">
-  <h3>Night View for {{ player.name }}</h3>
-
-  <p>
-    You are the {{ player.role.name }}.
-  </p>
-
-  {{#if stillNight game turnIndex}}
-    {{#if equals activeRole.name player.role.name }}
-      <p>
-        {{instructions game players player}}
-      </p>
-      {{#if turnMessage}}
-        <p>
-          {{turnMessage}}
-        </p>
-      {{/if}}
-    {{else}}
-      It is not your turn.
-    {{/if}}
-  {{/if}}
-
-  <h5>Center Cards</h5>
-  <div class="center-cards">
-    {{#each game.centerCards}}
-      <button class="btn btn-secondary center-cards" id="card-{{@index}}">
-        Card {{@index}}
-      </button>
-    {{/each}}
+<template name="gameView">
+  <h3 class="ui header">Game View</h3>
+  <div id="quest-tracker">
+    <h4 class="ui header">Quests</h4>
+    <!--tracks quests-->
+    <i class="circle icon"></i>
+    <i class="circle icon"></i>
+    <i class="circle icon"></i>
+    <i class="circle icon"></i>
+    <i class="circle icon"></i>
   </div>
-
-  <h5>Players</h5>
-  <div class="ingame-player-list">
-    {{#each players}}
-    <button class="btn btn-secondary player-cards" id="{{ _id }}">
-      {{ name }} <br />
-    </button>
-    {{/each}}
+  <div id="choose-quest-card">
+    <!--display quest cards to choose from if player is on quest-->
   </div>
-
-  <button class="btn btn-primary btn-lg" id="btn-end-turn">End Turn</button>
-  <br />
-  <br />
-
-  <button class="btn btn-secondary btn-md btn-end">End Game</button>
-  <button class="btn btn-secondary btn-md btn-leave">Leave Game</button>
-
+  <div id="display-quest-results">
+    <!--display result of quest-->
+    <!--must display numbeer of pass and fail cards-->
+  </div>
+  <div id="choose-quest-team">
+    <!--display all players-->
+  </div>
+  <div id="vote-quest-team">
+    <!--display players proposed on the quest-->
+    <!--display option to vote yes or no-->
+  </div>
+  <div id="roles-list">
+    <!--display list of all the roles currently in use in the game-->
+  </div>
 </template>
 
-<template name="dayView">
-  <h3>Day View for {{ player.name }}</h3>
-
-  {{#if equals game.state 'voting'}}
-  <p>
-    Vote for one player to kill.
-  </p>
-  {{/if}}
-
-  {{#if equals game.state 'finishedVoting'}}
-    <h4>{{ winningTeam }}</h4>
-    <h4>You ended up as the {{ player.role.name }}.</h4>
-    <h5>Voting results</h5>
-    {{#if noDeaths game}}
-    <p>No one died.</p>
-    {{else}}
-      <ol>
-        {{#each game.killed}}
-          <li>
-            {{ name }} (Role: {{ role.name }})
-            <br />
-          </li>
-        {{/each}}
-      </ol>
-    {{/if}}
-  {{else}}
-    <h4><a id="countdown">{{{ timeRemaining }}}</a></h4>
-  {{/if}}
-
-
-
-  <h5>Center Cards</h5>
-  <div class="center-cards">
-    {{#each game.centerCards}}
-      <button class="btn btn-secondary">
-        Card {{@index}}
-      </button>
-    {{/each}}
+<template name="gameEnd">
+  <div id="choose-player-to-assassinate">
+    <!--if servants pass three missions, minions can choose someone who they think is merlin to kill-->
   </div>
-
-  <h5>Players</h5>
-  <div class="ingame-player-list">
-    {{#each players}}
-      <button class="btn btn-secondary vote-player" id = {{ _id }}>
-        {{ name }} <br />
-      </button>
-      {{#if equals game.state 'finishedVoting'}}
-      (Role: {{ role.name }})
-      {{/if}}
-    {{/each}}
+  <div id="reveal-roles">
+    <!--reveal everyones roles-->
   </div>
-
-  <button class="btn btn-secondary btn-md btn-vote-now">Vote Now</button>
-  <button class="btn btn-secondary btn-md btn-end">End Game</button>
-  <button class="btn btn-secondary btn-md btn-leave">Leave Game</button>
-
+  <div id="results">
+    <!--display results of the game-->
+  </div>
 </template>
