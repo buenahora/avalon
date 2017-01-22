@@ -38,7 +38,7 @@ function generateNewGame() {
     // number of failed quests
     failedQuests: 0,
     // winning team
-    winner: 'Arthur';
+    winner: 'Arthur'
   };
 
   var gameID = Games.insert(game);
