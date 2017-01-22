@@ -227,7 +227,7 @@ Template.createGame.events({
 
     return false;
   },
-  'click .btn-back-start-menu': function() {
+  'click #btn-back-start-menu': function() {
     Session.set('currentView', 'startMenu');
     return false;
   }
@@ -291,7 +291,7 @@ Template.joinGame.events({
 
     return false;
   },
-  'click .btn-back-start-menu': function() {
+  'click #btn-back-start-menu': function() {
     Session.set('urlAccessCode', null);
     Session.set('currentView', 'startMenu');
     Session.set('errorMessage', null);
@@ -324,8 +324,8 @@ Template.lobby.helpers({
 })
 
 Template.lobby.events({
-  'click .btn-leave': leaveGame,
-  'click .btn-start': function() {
+  'click #btn-leave': leaveGame,
+  'click #btn-start': function() {
     Session.set('currentView', 'rolesMenu');
 
     var game = getCurrentGame();
@@ -374,8 +374,8 @@ Template.rolesMenu.events({
 
     return false;
   },
-  'click .btn-leave': leaveGame,
-  'click .btn-end': endGame
+  'click #btn-leave': leaveGame,
+  'click #btn-end': endGame
 })
 
 Handlebars.registerHelper('equals', function(str1, str2) {
