@@ -1,4 +1,5 @@
 import '../imports/roles.js';
+import '../imports/board.js';
 
 function generateAccessCode() {
   var code = '';
@@ -45,7 +46,8 @@ function generateNewPlayer(game, name) {
   var player = {
     gameID: game._id,
     name: name,
-    role: null
+    role: null,
+    team: null
   }
 
   var playerID = Players.insert(player);
