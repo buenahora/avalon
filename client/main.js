@@ -103,7 +103,8 @@ function updateQuestLeader() {
 }
 
 function getQuestLeader() {
-  
+  var questLeader = getCurrentGame().questLeader;
+  return Players.findOne({'gameID': gameID, 'turn': questLeader});
 }
 
 /* sets the state of the game (which template to render) */

@@ -61,7 +61,7 @@ function assignRoles(gameID, players, roles) {
   
   // turn value for each player
   var turns = [], playerRoles = [];
-  for (var i = 0; i < players.length; i++) {
+  for (var i = 0; i < players.count(); i++) {
     turns.push(i);
   }
   var shuffledTurns = shuffleArray(turns);
