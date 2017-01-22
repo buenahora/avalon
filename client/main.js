@@ -46,7 +46,8 @@ function generateNewPlayer(game, name) {
   var player = {
     gameID: game._id,
     name: name,
-    role: null
+    role: null,
+    team: null
   }
 
   var playerID = Players.insert(player);
@@ -320,16 +321,29 @@ Template.lobby.helpers({
     });
 
     return players;
+  },
+  errorMessage: function() {
+    return Session.get('errorMessage');
   }
 })
 
 Template.lobby.events({
   'click #btn-leave': leaveGame,
   'click #btn-start': function() {
-    Session.set('currentView', 'rolesMenu');
+    var gameID = getCurrentGame()._id;
+    var numPlayers = Players.find({'gameID': gameID}).count();
 
-    var game = getCurrentGame();
-    Games.update(game._id, {$set: {state: 'selectingRoles'}});
+    if (numPlayers < 5) {
+      Session.set('errorMessage', 'Game needs at least 5 players.');
+    } else if (numPlayers > 10) {
+      Session.set('errorMessage', 'Game can have at most 10 players.');
+    } else {
+      Session.set('errorMessage', null);
+      Session.set('currentView', 'rolesMenu');
+
+      var game = getCurrentGame();
+      Games.update(game._id, {$set: {state: 'selectingRoles'}});
+    }
   }
 })
 
@@ -365,7 +379,7 @@ Template.rolesMenu.events({
 
     var numPlayers = players.count();
     if (numMinions != boardInfo[numPlayers].numMinions - 1) {
-      Session.set('errorMessage', 'There must be ' + boardInfo[numPlayers].numMinions 
+      Session.set('errorMessage', 'There must be ' + boardInfo[numPlayers].numMinions
         + ' minions in a game with ' + numPlayers + 'players');
     } else {
       Games.update(gameID, {$set: {state: 'settingUp', roles: selectedRoles}});
