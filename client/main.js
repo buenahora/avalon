@@ -38,7 +38,7 @@ function generateNewGame() {
     // number of failed quests
     failedQuests: 0,
     // winning team
-    winner: 'Arthur';
+    winner: 'Arthur'
   };
 
   var gameID = Games.insert(game);
@@ -193,13 +193,15 @@ function resetGame() {
   Games.update(game._id, {$set: {
     roles: [],
     state: 'waitingForPlayers',
+    mode: 'PROPOSAL_MODE',
     quest: 1,
-    questLeader: null,
+    questLeader: 0,
     proposal: [],
     votes: 0,
     failedProposals: 0,
     fails: 0,
-    failedQuests: 0
+    failedQuests: 0,
+    winner: 'Arthur'
   }});
 }
 
@@ -426,6 +428,18 @@ function questFailed(game) {
     needed = boardInfo[numPlayers].numOnQuests[3];
   }
   return game.fails >= needed;
+}
+
+// returns true if the game can end
+// sets the game winner
+function gameOver(game) {
+  if (game.failedQuests == 3) {
+    Games.update({'winner':'Mordred'});
+    return true;
+  } else if (game.quest - game.failedQuest == 3) {
+    return true;
+  }
+  return false;
 }
 
 Templates.gameView.helpers({
