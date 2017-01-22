@@ -36,7 +36,7 @@ Games.find({'state': 'settingUp'}).observeChanges({
   added: function(id, game) {
     var players = Players.find({gameID: id});
     assignRoles(id, players, game.roles);
-    Games.update(id, {$set: {state: 'inProgress'}});
+    Games.update(id, {$set: { state: 'inProgress'}});
   }
 })
 
@@ -58,7 +58,6 @@ function shuffleArray(array) {
 }
 
 function assignRoles(gameID, players, roles) {
-
   var game = Games.findOne(gameID);
   var board = boardInfo[players.count()];
   var numMinions = board.numMinions;
@@ -82,10 +81,18 @@ function assignRoles(gameID, players, roles) {
 
   var shuffledRoles = shuffleArray(roles);
 
-  var playerRoles = [];
+  // turn value for each player
+  var turns = [], playerRoles = [];
+
+  for (var i = 0; i < players.count(); i++) {
+    turns.push(i);
+  }
+  var shuffledTurns = shuffleArray(turns);
+
   players.forEach(function(player) {
-    role = shuffledRoles.pop();
-    Players.update(player._id, {$set: {role: role}});
+    var role = shuffledRoles.pop();
+    var turn = shuffledTurns.pop();
+    Players.update(player._id, {$set: {role: role, turn: turn}});
     playerRoles.push(role);
   });
   playerRoles.sort(function(role1, role2) {
