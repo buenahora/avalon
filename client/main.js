@@ -21,7 +21,7 @@ function generateNewGame() {
     roles: [],
     // game states include 'waitingForPlayers', 'selectingRoles', 'settingUp', and 'inProgress'
     state: 'waitingForPlayers',
-    // mode: 'PROPOSAL', 'VOTING_MODE', 'QUEST_MODE'
+    // mode: 'PROPOSAL_MODE', 'VOTING_MODE', 'QUEST_MODE'
     mode: 'PROPOSAL_MODE',
     // current quest number (1-5)
     quest: 1,
@@ -29,16 +29,14 @@ function generateNewGame() {
     questLeader: 0,
     // players selected to go on a quest
     proposal: [],
-    // number of votes to pass the proposal
-    votes: 0,
+    // number of votes against a proposal
+    fails: 0,
     // number of proposals that were voted down
     failedProposals: 0,
-    // number of fails on a quest (as opposed to successes)
-    fails: 0,
     // number of failed quests
     failedQuests: 0,
     // winning team
-    winner: 'Arthur';
+    winner: 'Arthur'
   };
 
   var gameID = Games.insert(game);
@@ -96,8 +94,7 @@ function resetUserState() {
 
 function updateQuestLeader() {
   var questLeader = getCurrentGame().questLeader;
-  var gameID = getCurrentGame()._id;
-  var numPlayers = Players.find({'gameID': gameID}).count();
+  var numPlayers = Players.find({'gameID': getCurrentGame()._id}).count();
   if (questLeader != numPlayers - 1) {
     Games.update(game._id, {$set: {questLeader: questLeader + 1}});
   } else {
@@ -109,6 +106,35 @@ function updateQuestLeader() {
 function getQuestLeader() {
   var questLeader = getCurrentGame().questLeader;
   return Players.findOne({'gameID': gameID, 'turn': questLeader});
+}
+
+// returns true if the proposal passes, false otherwise
+function checkVotes(game) {
+  var numPlayers = Players.find({'gameID': game._id}).count();
+  return !(game.fails > numPlayers / 2);
+}
+
+function changeGameState() {
+  var game = getCurrentGame();
+  if (game.state === "PROPOSAL_MODE") {
+    Games.update(game._id, {$set: {mode: "VOTING_MODE"}});
+
+  } else if (game.state === "VOTING_MODE") {
+    if (checkVotes(game)) {
+      Games.update(game._id, {$set: {mode: "QUEST_MODE"}});
+    } else {
+      Games.update(game._id, {$set: {mode: "PROPOSAL_MODE"}});
+      Games.update(game._id, {$set: {failedProposals: game.failedProposals + 1}});
+      updateQuestLeader();
+    }
+
+  } else if (game.state === "QUEST_MODE") {
+    Games.update(game._id, {$set: {mode: "PROPOSAL_MODE"}});
+    Games.update(game._id, {$set: {quest: game.quest + 1 }});
+    if (game.quest == 5) {
+      gameOver(game);
+    }
+  }
 }
 
 /* sets the state of the game (which template to render) */
