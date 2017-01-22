@@ -21,6 +21,8 @@ function generateNewGame() {
     roles: [],
     // game states include 'waitingForPlayers', 'selectingRoles', 'settingUp', and 'inProgress'
     state: 'waitingForPlayers',
+    // mode: 'PROPOSAL', 'VOTING_MODE', 'QUEST_MODE'
+    mode: 'PROPOSAL_MODE',
     // current quest number (1-5)
     quest: 1,
     // player ID of the quest leader
@@ -34,7 +36,9 @@ function generateNewGame() {
     // number of fails on a quest (as opposed to successes)
     fails: 0,
     // number of failed quests
-    failedQuests: 0
+    failedQuests: 0,
+    // winning team
+    winner: 'Arthur';
   };
 
   var gameID = Games.insert(game);
@@ -394,4 +398,31 @@ Template.rolesMenu.events({
 
 Handlebars.registerHelper('equals', function(str1, str2) {
   return str1 === str2;
+})
+
+// returns true if the quest failed
+function questFailed(game) {
+  var numPlayers = Players.find({'gameID': game._id}).count();
+  var needed = 1;
+  if (game.quest == 4) {
+    needed = boardInfo[numPlayers].numOnQuests[3];
+  }
+  return game.fails >= needed;
+}
+
+Templates.gameView.helpers({
+  game: function() {
+    return getCurrentGame();
+  },
+  player: function() {
+    return getCurrentPlayer();
+  },
+  players: function() {
+    var game = getCurrentGame();
+    var players = Players.find({'gameID': game._id}, {'sort': {'createdAt': 1}}).fetch();
+    return players;
+  }
+})
+
+Templates.gameView.events({
 })
