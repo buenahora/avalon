@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import '../imports/roles.js';
+import '../imports/board.js';
 
 Meteor.startup(() => {
   Games.remove({});
@@ -57,18 +58,40 @@ function shuffleArray(array) {
 }
 
 function assignRoles(gameID, players, roles) {
+  var game = Games.findOne(gameID);
+  var board = boardInfo[players.count()];
+  var numMinions = board.numMinions;
+  var numServants = players.count() - numMinions;
+  for (var i in roles) {
+    if (roles[i].team === 'Arthur') {
+      numServants--;
+    } else if (roles[i].team === 'Mordred') {
+      numMinions--;
+    }
+  }
+  roles.push(allRoles.merlin);
+  roles.push(allRoles.assassin);
+
+  for (var i = 0; i < numServants - 1; i++) {
+    roles.push(allRoles.servant);
+  }
+  for (var i = 0; i < numMinions - 1; i++) {
+    roles.push(allRoles.minion);
+  }
+
   var shuffledRoles = shuffleArray(roles);
-  
+
   // turn value for each player
   var turns = [], playerRoles = [];
-  for (var i = 0; i < players.length; i++) {
+
+  for (var i = 0; i < players.count(); i++) {
     turns.push(i);
   }
   var shuffledTurns = shuffleArray(turns);
 
   players.forEach(function(player) {
-    role = shuffledRoles.pop();
-    turn = shuffledTurns.pop();
+    var role = shuffledRoles.pop();
+    var turn = shuffledTurns.pop();
     Players.update(player._id, {$set: {role: role, turn: turn}});
     playerRoles.push(role);
   });

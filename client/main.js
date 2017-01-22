@@ -103,7 +103,7 @@ function updateQuestLeader() {
 }
 
 function getQuestLeader() {
-  
+
 }
 
 /* sets the state of the game (which template to render) */
@@ -395,7 +395,7 @@ Template.rolesMenu.events({
     });
 
     var numPlayers = players.count();
-    if (numMinions != boardInfo[numPlayers].numMinions - 1) {
+    if (numMinions > boardInfo[numPlayers].numMinions - 1) {
       Session.set('errorMessage', 'There must be ' + boardInfo[numPlayers].numMinions
         + ' minions in a game with ' + numPlayers + ' players.');
     } else {
