@@ -102,10 +102,6 @@ function updateQuestLeader() {
   }
 }
 
-function getQuestLeader() {
-
-}
-
 /* sets the state of the game (which template to render) */
 /* types of game state:
     waitingForPlayers (lobby)
