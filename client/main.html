@@ -109,18 +109,100 @@
 </template>
 
 <template name="gameView">
-  <h3 class="ui header">Game View</h3>
-  <div class="ui divider"></div>
+  <!--tracks quests-->
   <div id="quest-tracker">
     <h4 class="ui header">Quests</h4>
-    <!--tracks quests-->
-    <i class="circle icon"></i>
-    <i class="circle icon"></i>
-    <i class="circle icon"></i>
-    <i class="circle icon"></i>
-    <i class="circle icon"></i>
+    <div class="ui grey empty circular label" id="quest-1"></div>
+    <div class="ui grey empty circular label" id="quest-2"></div>
+    <div class="ui grey empty circular label" id="quest-3"></div>
+    <div class="ui grey empty circular label" id="quest-4"></div>
+    <div class="ui grey empty circular label" id="quest-5"></div>
   </div>
+
   <div class="ui divider"></div>
+
+  <div id="player-list">
+    <div class="ui segment">
+      <div class="ui top attached label">Players</div>
+      <div class="ui list">
+        <!--display all players-->
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 1
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 2
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 3
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 4
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 5
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 6
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 7
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 8
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 9
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              Player 10
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui divider"></div>
+
+  <!--display quest cards to choose from if player is on quest-->
   <div id="choose-quest-card">
     <h4 class="ui header">Select Quest Card</h4>
     <div class="ui two stackable cards">
@@ -141,56 +223,152 @@
         </div>
       </div>
     </div>
-    <!--display quest cards to choose from if player is on quest-->
   </div>
+
   <div class="ui divider"></div>
+
   <div id="display-quest-results">
-    <h4 class="header">Quest Results</h4>
+    <div class="ui segment">
+      <div class="ui top attached label">Quest Results</div>
+      <!--display players proposed on the quest-->
+      <!--display option to vote yes or no-->
+      <div class="content">
+        Mission Passed
+        Number of Successes:
+        Number of Fails:
+      </div>
+    </div>
     <!--display result of quest-->
     <!--must display numbeer of pass and fail cards-->
   </div>
   <div class="ui divider"></div>
   <div id="choose-quest-team">
-    <h4 class="ui header">Players</h4>
-    <div class="ui horizontal selection list">
-      <!--display all players-->
-      <div class="item">
-        <div class="list-player">
-          <div class="content">
-            <a class="header">Player 1</a>
+    <div class="ui segment">
+      <div class="ui top attached label">Propose a Team</div>
+      <div class="ui horizontal selection list">
+        <!--display all players-->
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 1</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 2</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 3</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 4</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 5</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 6</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 7</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 8</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 9</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 10</a>
+            </div>
           </div>
         </div>
       </div>
-      <div class="item">
-        <div class="list-player">
-          <div class="content">
-            <a class="header">Player 2</a>
-          </div>
-        </div>
-      </div>
-      <div class="item">
-        <div class="list-player">
-          <div class="content">
-            <a class="header">Player 3</a>
-          </div>
-        </div>
-      </div>
-      <div class="item">
-        <div class="list-player">
-          <div class="content">
-            <a class="header">Player 4</a>
-          </div>
-        </div>
-      </div>
+
+      <button class="ui button">Okay</button>
     </div>
   </div>
   <div class="ui divider"></div>
   <div id="vote-quest-team">
-    <h4 class="ui header">Proposed Team</h4>
-    <!--display players proposed on the quest-->
-    <!--display option to vote yes or no-->
-    <button class="positive ui button">Approve</button>
-    <button class="negative ui button">Reject</button>
+    <div class="ui segment">
+      <div class="ui top attached label">Proposed Team</div>
+      <!--display players proposed on the quest-->
+      <!--display option to vote yes or no-->
+      <div class="ui horizontal list">
+        <!--display all players-->
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 1</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 2</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 3</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 4</a>
+            </div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-player">
+            <div class="content">
+              <a class="header">Player 5</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="positive ui button">Approve</button>
+      <button class="negative ui button">Reject</button>
+    </div>
   </div>
   <div class="ui divider"></div>
   <div id="roles-list">
@@ -198,10 +376,20 @@
     <div class="ui horizontal list">
       <div class="item">
         <div class="content">
-          <a class="header">Merlin</a>
+          Merlin
         </div>
       </div>
-    <!--display list of all the roles currently in use in the game-->
+      <div class="item">
+        <div class="content">
+          Percival
+        </div>
+      </div>
+      <div class="item">
+        <div class="content">
+          Morgana
+        </div>
+      </div>
+      <!--display list of all the roles currently in use in the game-->
     </div>
   </div>
 </template>
